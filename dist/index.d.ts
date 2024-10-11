@@ -59,7 +59,6 @@ declare class RouterManagement implements RouterManagement {
     refresh(): void;
     replace(searchPathname: string, state?: PushHistory['state']): void;
     config(routeData: Routes[], basePath?: string): void;
-    private resolveElement;
 }
 declare class RouterSetup extends RouterManagement {
     #private;

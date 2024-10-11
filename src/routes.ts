@@ -167,7 +167,7 @@ class RouterManagement implements RouterManagement {
   }
 
   #directRoute(routeRenderEle: Element[], routeData: RouteWithLocation) {
-    const { nestedLevel, element } = routeData;
+    const { nestedLevel } = routeData;
     const routeEle = routeRenderEle[nestedLevel];
     if (routeEle) {
       routeEle.innerHTML = '';
@@ -220,7 +220,7 @@ class RouterManagement implements RouterManagement {
       if (routeInfo.pathname === '*') {
         const element = this.#routes['*']!.element();
         if (element instanceof Promise) {
-          element.then(el => routeFragmentEle?.appendChild(el));
+          element.then(el => routeFragmentEle?.appendChild(el)).catch(err => console.error(err));
         } else {
           routeFragmentEle?.appendChild(element);
         }
@@ -228,7 +228,7 @@ class RouterManagement implements RouterManagement {
       } else {
         const element = routeInfo.element();
         if (element instanceof Promise) {
-          element.then(el => routeFragmentEle?.appendChild(el));
+          element.then(el => routeFragmentEle?.appendChild(el)).catch(err => console.error(err));;
         } else {
           routeFragmentEle?.appendChild(element);
         }
