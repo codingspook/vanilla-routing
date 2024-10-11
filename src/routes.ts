@@ -169,21 +169,13 @@ class RouterManagement implements RouterManagement {
   #directRoute(routeRenderEle: Element[], routeData: RouteWithLocation) {
     const { nestedLevel, element } = routeData;
     const routeEle = routeRenderEle[nestedLevel];
-    console.log(element);
     if (routeEle) {
       routeEle.innerHTML = '';
+      const element = routeData.element();
       if (element instanceof Promise) {
-        element.then(el => {
-          if (el instanceof Element || el instanceof DocumentFragment) {
-            routeEle.appendChild(el);
-          } else {
-            console.error('L\'elemento restituito dalla promessa non è un Element o DocumentFragment valido');
-          }
-        });
-      } else if (element instanceof Element || element instanceof DocumentFragment) {
-        routeEle.appendChild(element);
+        element.then(el => routeEle?.appendChild(el)).catch(err => console.error(err));
       } else {
-        console.error('L\'elemento fornito non è un Element o DocumentFragment valido');
+        routeEle?.appendChild(element);
       }
     }
   }
@@ -384,14 +376,6 @@ class RouterManagement implements RouterManagement {
   // route config
   config(routeData: Routes[], basePath = '') {
     this.#routeConfig(routeData, basePath);
-  }
-
-  private async resolveElement(element: Route['element']): Promise<Element | DocumentFragment> {
-    const result = element();
-    if (result instanceof Promise) {
-      return await result;
-    }
-    return result;
   }
 }
 
