@@ -1,16 +1,9 @@
 <!-- [![Coverage Status](https://coveralls.io/repos/github/jscodelover/vanilla-routing/badge.svg?branch=main)](https://coveralls.io/github/jscodelover/vanilla-routing?branch=main) -->
 
 # Vanilla Routing
-
-[![npm](https://badgen.net/npm/v/vanilla-routing)](https://www.npmjs.com/package/vanilla-routing)
-[![npm](https://badgen.net/npm/dm/vanilla-routing)](https://www.npmjs.com/package/vanilla-routing)
-[![Release](https://github.com/jscodelover/vanilla-routing/actions/workflows/main.yml/badge.svg)](https://github.com/jscodelover/vanilla-routing/actions/workflows/main.yml)
-[![License](https://badgen.net/github/license/jscodelover/vanilla-routing)](https://raw.githubusercontent.com/jscodelover/vanilla-routing/main/LICENSE)
-
-[![NPM](https://nodei.co/npm/vanilla-routing.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/vanilla-routing/)
-
-[![NPM](https://nodei.co/npm-dl/vanilla-routing.png?months=1&height=3)](https://nodei.co/npm/vanilla-routing/)
-
+  
+  [![npm version](https://badge.fury.io/js/vanilla-routing.svg)](https://badge.fury.io/js/vanilla-routing)
+  [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 ## Description
 
 The Vanilla Routing stands out as a lightweight and versatile routing solution designed for vanilla JavaScript web applications. This router seamlessly handles both browser-based and hash-based routing, empowering developers to effortlessly navigate and manage various views within their applications without the need for complete application reloads. As a dedicated Single Page Application (SPA) router tailored for Vanilla JS enthusiasts, it provides a streamlined approach to enhancing user experience and application flow.
