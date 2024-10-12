@@ -2,8 +2,11 @@
 
 # Vanilla Routing
   
-  [![npm version](https://badge.fury.io/js/vanilla-routing.svg)](https://badge.fury.io/js/vanilla-routing)
+  [![npm version](https://badge.fury.io/js/@codingspook%2Fvanilla-routing.svg)](https://badge.fury.io/js/@codingspook%2Fvanilla-routing)
   [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+## Forked from [jscodelover/vanilla-routing]
+
 ## Description
 
 The Vanilla Routing stands out as a lightweight and versatile routing solution designed for vanilla JavaScript web applications. This router seamlessly handles both browser-based and hash-based routing, empowering developers to effortlessly navigate and manage various views within their applications without the need for complete application reloads. As a dedicated Single Page Application (SPA) router tailored for Vanilla JS enthusiasts, it provides a streamlined approach to enhancing user experience and application flow.
