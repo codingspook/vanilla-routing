@@ -1,9 +1,21 @@
 {
-  "name": "vanilla-routing",
+  "name": "@codingspook/vanilla-routing",
   "license": "MIT",
-  "version": "0.0.4",
-  "author": "Manisha Basra (jscodelover)",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/codingspook/vanilla-routing.git"
+  },
+  "version": "1.0.0",
+  "author": "Manuel Di Campli (codingspook)",
   "description": "Modern Vanilla Javascript routing library.",
+  "fork": {
+    "author": "Manisha Basra (jscodelover)",
+    "version": "0.0.4",
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/jscodelover/vanilla-routing.git"
+    }
+  },
   "keywords": [
     "route",
     "routing",
