@@ -312,11 +312,18 @@ class RouterManagement implements RouterManagement {
     }
   }
 
+  #onRouteChange(pathname: string) {
+    const event = new CustomEvent('routeChange', { detail: { pathname } });
+    window.dispatchEvent(event);
+  }
+
   // route change
   go(searchPathname: string, options?: PushHistory) {
     if (this.routeType === HashRouteType && !searchPathname.startsWith('/#')) {
       searchPathname = `/#` + searchPathname;
     }
+
+    this.#onRouteChange(searchPathname);
 
     this.#push(searchPathname, options);
   }
@@ -333,6 +340,13 @@ class RouterManagement implements RouterManagement {
   }
   getLocation() {
     return this.#location;
+  }
+
+  addRouteChangeListener(listener: (pathname: string) => void) {
+    window.addEventListener('routeChange', (event: Event) => {
+      const routeChangeEvent = event as CustomEvent<{ pathname: string }>;
+      listener(routeChangeEvent.detail.pathname);
+    });
   }
 
   back() {
