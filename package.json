@@ -5,7 +5,7 @@
     "type": "git",
     "url": "https://github.com/codingspook/vanilla-routing.git"
   },
-  "version": "1.0.3",
+  "version": "1.0.4",
   "author": "Manuel Di Campli (codingspook)",
   "description": "Modern Vanilla Javascript routing library.",
   "fork": {
