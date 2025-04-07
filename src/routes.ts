@@ -173,9 +173,15 @@ class RouterManagement implements RouterManagement {
       routeEle.innerHTML = '';
       const element = routeData.element();
       if (element instanceof Promise) {
-        element.then(el => routeEle?.appendChild(el)).catch(err => console.error(err));
+        element
+          .then(el => {
+            routeEle?.appendChild(el);
+            this.addRouteListeners();
+          })
+          .catch(err => console.error(err));
       } else {
         routeEle?.appendChild(element);
+        this.addRouteListeners();
       }
     }
   }
@@ -220,25 +226,38 @@ class RouterManagement implements RouterManagement {
       if (routeInfo.pathname === '*') {
         const element = this.#routes['*']!.element();
         if (element instanceof Promise) {
-          element.then(el => routeFragmentEle?.appendChild(el)).catch(err => console.error(err));
+          element
+            .then(el => {
+              routeFragmentEle?.appendChild(el);
+              this.addRouteListeners();
+            })
+            .catch(err => console.error(err));
         } else {
           routeFragmentEle?.appendChild(element);
+          this.addRouteListeners();
         }
         break;
       } else {
         const element = routeInfo.element();
         if (element instanceof Promise) {
-          element.then(el => routeFragmentEle?.appendChild(el)).catch(err => console.error(err));;
+          element
+            .then(el => {
+              routeFragmentEle?.appendChild(el);
+              this.addRouteListeners();
+            })
+            .catch(err => console.error(err));
         } else {
           routeFragmentEle?.appendChild(element);
+          this.addRouteListeners();
         }
       }
     }
 
-    const routeEle = renderRouteEle[routeElementsLen]; //  route element in which subRoute element will be rendered
+    const routeEle = renderRouteEle[routeElementsLen];
     if (routeEle) {
       routeEle.innerHTML = '';
       routeEle.appendChild(fragment);
+      this.addRouteListeners();
     }
   }
 
@@ -312,9 +331,36 @@ class RouterManagement implements RouterManagement {
     }
   }
 
+  #removeListeners() {
+    const links = document.querySelectorAll('a[data-vanilla-route-link="spa"]');
+    if (links) {
+      links.forEach(link => {
+        link.removeEventListener('click', this.#handleClick);
+      });
+    }
+  }
+
+  #handleClick = (event: Event) => {
+    event.preventDefault();
+    const href = (event.target as Element).getAttribute('href') ?? '';
+    this.go(href);
+  };
+
+  addRouteListeners() {
+    this.#removeListeners();
+    const links = document.querySelectorAll('a[data-vanilla-route-link="spa"]');
+    if (links) {
+      links.forEach(link => {
+        link.addEventListener('click', this.#handleClick);
+      });
+    }
+  }
+
   #onRouteChange(pathname: string) {
     const event = new CustomEvent('routeChange', { detail: { pathname } });
     window.dispatchEvent(event);
+    // Riattacca i listener dopo il cambio di route
+    this.addRouteListeners();
   }
 
   // route change
@@ -402,7 +448,7 @@ class RouterSetup extends RouterManagement {
     this.#checkRouteSetup();
     this.config(routeData);
     this.#backListener();
-    this.#addListener();
+    this.addRouteListeners();
   }
 
   // take the user on the previous route on using the the browser back functionality
@@ -414,19 +460,6 @@ class RouterSetup extends RouterManagement {
         this.go(pathname as string, { state: {}, addToHistory: false });
       }
     });
-  }
-
-  #addListener() {
-    const links = document.querySelectorAll('a[data-vanilla-route-link="spa"]');
-    if (links) {
-      links.forEach(link => {
-        link.addEventListener('click', event => {
-          event.preventDefault();
-          const href = (event.target as Element).getAttribute('href') ?? '';
-          this.go(href);
-        });
-      });
-    }
   }
 
   #checkRouteSetup() {
