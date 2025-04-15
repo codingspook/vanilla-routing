@@ -342,7 +342,9 @@ class RouterManagement implements RouterManagement {
 
   #handleClick = (event: Event) => {
     event.preventDefault();
-    const href = (event.target as Element).getAttribute('href') ?? '';
+    const target = event.target as Element;
+    const link = target.closest('a[data-vanilla-route-link="spa"]');
+    const href = link?.getAttribute('href') ?? '';
     this.go(href);
   };
 
