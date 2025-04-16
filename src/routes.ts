@@ -187,78 +187,128 @@ class RouterManagement implements RouterManagement {
   }
 
   #directNestedRoute(searchPathname: string, routeData: RouteWithLocation) {
-    const { nestedLevel, pathname } = routeData;
+    console.log('DirectNestedRoute:', { searchPathname, routeData });
 
-    const renderRouteEle = [
-      ...document.querySelectorAll('[data-vanilla-route-ele="router-wrap"]'),
-    ];
+    // Otteniamo prima tutti i segmenti del path
+    const pathSegments = this.#removeQueryParamsAndHash(searchPathname).split('/').filter(Boolean);
+    console.log('Path segments:', pathSegments);
 
-    // number of the sub-route element which have the content
-    const routeElementsLen = renderRouteEle.length - 1;
+    // Troviamo o creiamo gli outlet necessari
+    let currentOutlet = document.querySelector('[data-vanilla-route-ele="router-wrap"]');
+    let currentPath = '';
 
-    const cleanPath = this.#removeQueryParamsAndHash(searchPathname).split('/');
+    // Iteriamo attraverso i segmenti del path
+    for (let i = 0; i < pathSegments.length; i++) {
+      if (!currentOutlet) break;
 
-    // with/without existing route path
-    const pathArr =
-      pathname === '*'
-        ? cleanPath.slice(1)
-        : cleanPath.slice(1, nestedLevel + 2);
+      currentPath += '/' + pathSegments[i];
+      console.log('Processing path:', currentPath);
 
-    // search for the path whose router element doesn't exist in the DOM
-    const searchPathArr = pathArr.splice(routeElementsLen);
+      const currentRoute = this.#getRoute(currentPath);
+      console.log('Current route:', currentRoute);
 
-    // route for which we have to render its route element
-    let nextPath =
-      routeElementsLen > 0
-        ? `/${pathArr.splice(0, routeElementsLen).join('/')}`
-        : '';
-    const fragment = document.createDocumentFragment();
+      // Se siamo all'ultimo segmento, renderizziamo la route corrente
+      if (i === pathSegments.length - 1) {
+        console.log('Rendering final route in:', currentOutlet);
+        // Ripristiniamo il contenuto della rotta parent
+        const parentPath = this.#getParentPath(searchPathname, i - 1);
+        const parentRoute = this.#getRoute(parentPath);
+        const parentElement = parentRoute.element();
 
-    for (const [index, path] of searchPathArr.entries()) {
-      const renderEleFragment = [
-        ...fragment.querySelectorAll('[data-vanilla-route-ele="router-wrap"]'),
-      ];
-      const routeFragmentEle =
-        index === 0 ? fragment : renderEleFragment[index - 1];
+        // Svuotiamo l'outlet corrente
+        currentOutlet.innerHTML = '';
 
-      const routeInfo = this.#getRoute(`${nextPath}/${path}`);
-      nextPath += `/${path}`;
-      if (routeInfo.pathname === '*') {
-        const element = this.#routes['*']!.element();
-        if (element instanceof Promise) {
-          element
+        // Renderizziamo prima il parent
+        if (parentElement instanceof Promise) {
+          parentElement
             .then(el => {
-              routeFragmentEle?.appendChild(el);
-              this.addRouteListeners();
+              if (currentOutlet) {
+                currentOutlet.appendChild(el);
+                // Dopo aver renderizzato il parent, renderizziamo la route corrente
+                const element = routeData.element();
+                if (element instanceof Promise) {
+                  element
+                    .then(childEl => {
+                      const nextOutlet = document.querySelectorAll('[data-vanilla-route-ele="router-wrap"]')[i];
+                      if (nextOutlet) {
+                        nextOutlet.innerHTML = '';
+                        nextOutlet.appendChild(childEl);
+                        this.addRouteListeners();
+                      }
+                    })
+                    .catch(err => console.error(err));
+                } else {
+                  const nextOutlet = document.querySelectorAll('[data-vanilla-route-ele="router-wrap"]')[i];
+                  if (nextOutlet) {
+                    nextOutlet.innerHTML = '';
+                    nextOutlet.appendChild(element);
+                    this.addRouteListeners();
+                  }
+                }
+              }
             })
             .catch(err => console.error(err));
         } else {
-          routeFragmentEle?.appendChild(element);
-          this.addRouteListeners();
+          currentOutlet.appendChild(parentElement);
+          // Dopo aver renderizzato il parent, renderizziamo la route corrente
+          const element = routeData.element();
+          if (element instanceof Promise) {
+            element
+              .then(childEl => {
+                const nextOutlet = document.querySelectorAll('[data-vanilla-route-ele="router-wrap"]')[i];
+                if (nextOutlet) {
+                  nextOutlet.innerHTML = '';
+                  nextOutlet.appendChild(childEl);
+                  this.addRouteListeners();
+                }
+              })
+              .catch(err => console.error(err));
+          } else {
+            const nextOutlet = document.querySelectorAll('[data-vanilla-route-ele="router-wrap"]')[i];
+            if (nextOutlet) {
+              nextOutlet.innerHTML = '';
+              nextOutlet.appendChild(element);
+              this.addRouteListeners();
+            }
+          }
         }
-        break;
-      } else {
-        const element = routeInfo.element();
-        if (element instanceof Promise) {
-          element
-            .then(el => {
-              routeFragmentEle?.appendChild(el);
-              this.addRouteListeners();
-            })
-            .catch(err => console.error(err));
+      }
+      // Altrimenti, renderizziamo il parent e troviamo il prossimo outlet
+      else {
+        if (currentOutlet.children.length === 0) {
+          console.log('Rendering parent route');
+          const element = currentRoute.element();
+          if (element instanceof Promise) {
+            element
+              .then(el => {
+                if (currentOutlet) {
+                  currentOutlet.appendChild(el);
+                  this.addRouteListeners();
+                }
+                // Aggiorniamo currentOutlet dopo che il parent è stato renderizzato
+                const nextOutlet = document.querySelectorAll('[data-vanilla-route-ele="router-wrap"]')[i + 1];
+                currentOutlet = nextOutlet || null;
+              })
+              .catch(err => console.error(err));
+          } else {
+            currentOutlet.appendChild(element);
+            this.addRouteListeners();
+            // Aggiorniamo currentOutlet dopo che il parent è stato renderizzato
+            const nextOutlet = document.querySelectorAll('[data-vanilla-route-ele="router-wrap"]')[i + 1];
+            currentOutlet = nextOutlet || null;
+          }
         } else {
-          routeFragmentEle?.appendChild(element);
-          this.addRouteListeners();
+          // Se il parent è già renderizzato, troviamo il prossimo outlet
+          const nextOutlet = document.querySelectorAll('[data-vanilla-route-ele="router-wrap"]')[i + 1];
+          currentOutlet = nextOutlet || null;
         }
       }
     }
+  }
 
-    const routeEle = renderRouteEle[routeElementsLen];
-    if (routeEle) {
-      routeEle.innerHTML = '';
-      routeEle.appendChild(fragment);
-      this.addRouteListeners();
-    }
+  #getParentPath(path: string, level: number): string {
+    const parts = this.#removeQueryParamsAndHash(path).split('/').filter(Boolean);
+    return '/' + parts.slice(0, level + 1).join('/');
   }
 
   #updateHistory({
@@ -298,9 +348,11 @@ class RouterManagement implements RouterManagement {
   #push(searchPathname: string, options?: PushHistory, replaceState = false) {
     const routePath = this.#routePath(searchPathname);
     if (this.#isNotSameRoute(routePath)) {
+      console.log('Push:', { routePath, searchPathname });
+
       const { state = {}, addToHistory = true } = options ?? {};
       const routeData = this.#getRoute(routePath);
-      const { params, search, hash, pathname, nestedLevel } = routeData;
+      const { params, search, hash, pathname } = routeData;
 
       this.#unMount();
 
@@ -317,16 +369,32 @@ class RouterManagement implements RouterManagement {
         ...document.querySelectorAll('[data-vanilla-route-ele="router-wrap"]'),
       ];
 
-      // direct accessing the route
-      if (routeRenderEle.length - 1 >= nestedLevel && pathname !== '*') {
-        this.#directRoute(routeRenderEle, routeData);
-      }
-      // route by route access to the nested route
-      else {
+      console.log('Route data:', routeData);
+
+      if (routeData.isSubRoute) {
         this.#directNestedRoute(routePath, routeData);
+      } else {
+        // Se non è una subroute, pulisci tutti gli outlet e renderizza nella root
+        routeRenderEle.forEach(ele => {
+          ele.innerHTML = '';
+        });
+        const rootOutlet = routeRenderEle[0];
+        if (rootOutlet) {
+          const element = routeData.element();
+          if (element instanceof Promise) {
+            element
+              .then(el => {
+                rootOutlet.appendChild(el);
+                this.addRouteListeners();
+              })
+              .catch(err => console.error(err));
+          } else {
+            rootOutlet.appendChild(element);
+            this.addRouteListeners();
+          }
+        }
       }
 
-      // on route change, page should start from the top
       window.scrollTo(0, 0);
     }
   }
@@ -438,6 +506,14 @@ class RouterManagement implements RouterManagement {
   // route config
   config(routeData: Routes[], basePath = '') {
     this.#routeConfig(routeData, basePath);
+  }
+
+  registerRouteLink(elements: HTMLAnchorElement | HTMLAnchorElement[] | NodeListOf<HTMLAnchorElement>) {
+    if (elements instanceof NodeList || Array.isArray(elements)) {
+      elements.forEach(link => link.addEventListener('click', this.#handleClick));
+    } else {
+      elements.addEventListener('click', this.#handleClick);
+    }
   }
 }
 
